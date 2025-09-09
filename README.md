@@ -17,31 +17,37 @@ The goal is to provide hands-on performance benchmarking across different data p
 ```
 benchmark-bq-spark/
 ├── data/
-│   ├── raw/                    # Raw CSVs
-│   ├── processed/              # Cleaned CSVs
-│   └── README.md               # Dataset instructions
+│   ├── raw/                    # Raw CSV files (source data for benchmarking)
+│   └── processed/              # Cleaned and processed CSV files ready for engine comparison
 ├── scripts/
-│   ├── data_preparation/
-│   │   └── data_prepare.py
-│   ├── bigquery_native/
-│   │   ├── bq_ingest.py
-│   │   └── benchmark_query.py
-│   ├── bigquery_external/
-│   │   ├── create_external_table.py
-│   │   └── benchmark_query.py
-│   ├── pyspark/
-│   │   ├── pyspark_load.py
-│   │   └── benchmark_query.py
-│   ├── monitoring/
-│   │   └── monitor_cpu.py
-│   └── orchestrator/
-│       └── benchmark.py
-├── results/
-│   └── README.md
-├── requirements.txt
-├── README.md
-└── .gitignore
+│   ├── config/                 # GCP configuration and connection management
+│   ├── data_preparation/       # Sample data generation and processing
+│   ├── bigquery_native/        # BigQuery native table scripts
+│   ├── bigquery_external/      # BigQuery external table scripts (planned)
+│   ├── pyspark/               # PySpark processing scripts (planned)
+│   ├── monitoring/            # Performance monitoring tools (planned)
+│   └── orchestrator/          # Benchmark orchestration (planned)
+├── results/                   # Performance metrics and analysis results
+├── docs/                      # Project documentation
+├── requirements.txt           # Python dependencies
+├── .env.example              # Environment configuration template
+└── .gitignore               # Git exclusions
 ```
+
+### 📊 Dataset: CMS Hospital Cost Report Information System (HCRIS)
+
+**What it is**: Financial and utilization data reported annually by U.S. hospitals  
+**Why this dataset**: Contains complex analytical queries with joins, aggregations, and window functions - perfect for benchmarking different data processing engines.
+
+### 🔄 Data Flow Across Engines
+
+1. **Raw Data**: Source CSV files stored in `data/raw/` directory
+2. **Processing**: Data preparation scripts clean and standardize data  
+3. **Staging**: Processed files saved to `data/processed/` directory
+4. **Engine Distribution**:
+   - **BigQuery Native**: Ingest CSV into BigQuery tables
+   - **BigQuery External**: Upload to GCS, query directly from storage  
+   - **PySpark**: Load CSV into DataFrames for distributed processing
 
 ## 📊 Benchmark Query
 
