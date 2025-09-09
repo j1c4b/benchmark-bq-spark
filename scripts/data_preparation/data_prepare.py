@@ -81,8 +81,8 @@ class HospitalDataPreparer:
         ]
         
         for i in range(num_rows):
-            # Generate provider ID (6-digit format used by CMS)
-            provider_id = f"{100000 + i:06d}"
+            # Generate provider ID (integer format)
+            provider_id = 100000 + i
             
             # Hospital details
             city = random.choice(cities)
@@ -90,12 +90,12 @@ class HospitalDataPreparer:
             hospital_name = f"{city} {random.choice(hospital_names)}"
             
             # Bed count (realistic distribution)
-            beds = int(np.random.lognormal(mean=4.5, sigma=0.8))
-            beds = max(25, min(beds, 1200))  # Cap between 25-1200 beds
+            beds_number = int(np.random.lognormal(mean=4.5, sigma=0.8))
+            beds_number = max(25, min(beds_number, 1200))  # Cap between 25-1200 beds
             
             # Financial data (correlated with bed count)
             base_cost_per_bed = np.random.normal(500000, 100000)  # $500k per bed average
-            total_expenses = max(1000000, beds * base_cost_per_bed * np.random.normal(1.0, 0.3))
+            total_expenses = max(1000000, beds_number * base_cost_per_bed * np.random.normal(1.0, 0.3))
             
             # Charges are typically 3-5x costs
             charge_multiplier = np.random.uniform(2.5, 5.5)
@@ -106,31 +106,31 @@ class HospitalDataPreparer:
             other_revenue = total_expenses * np.random.uniform(0.05, 0.15)
             net_income = revenue + other_revenue - total_expenses
             
-            # Reporting period (recent years)
+            # Report period (recent years)
             year = random.choice([2021, 2022, 2023, 2024])
-            reporting_period_end = datetime(year, 12, 31)
+            report_period = datetime(year, 12, 31)
             
             hospitals.append({
                 'provider_id': provider_id,
                 'hospital_name': hospital_name,
                 'city': city,
                 'state': state,
-                'beds': beds,
-                'reporting_period_end': reporting_period_end,
+                'beds_number': beds_number,
+                'report_period': report_period,
                 'total_expenses': round(total_expenses, 2),
                 'total_charges': round(total_charges, 2),
                 'net_income': round(net_income, 2),
-                'patient_days': int(beds * np.random.uniform(200, 350)),  # Occupancy rate
-                'discharges': int(beds * np.random.uniform(15, 45)),      # Turnover
-                'fte_employees': int(beds * np.random.uniform(3, 8)),     # Staff ratio
-                'medicare_days': int(beds * np.random.uniform(80, 200)),  # Medicare utilization
-                'medicaid_days': int(beds * np.random.uniform(30, 120)),  # Medicaid utilization
+                'patient_days': int(beds_number * np.random.uniform(200, 350)),  # Occupancy rate
+                'discharges': int(beds_number * np.random.uniform(15, 45)),      # Turnover
+                'fte_employees': int(beds_number * np.random.uniform(3, 8)),     # Staff ratio
+                'medicare_days': int(beds_number * np.random.uniform(80, 200)),  # Medicare utilization
+                'medicaid_days': int(beds_number * np.random.uniform(30, 120)),  # Medicaid utilization
             })
         
         df = pd.DataFrame(hospitals)
         
         logger.info(f"Generated sample data: {len(df)} hospitals")
-        logger.info(f"Bed count range: {df['beds'].min()}-{df['beds'].max()}")
+        logger.info(f"Bed count range: {df['beds_number'].min()}-{df['beds_number'].max()}")
         logger.info(f"Expense range: ${df['total_expenses'].min():,.0f} - ${df['total_expenses'].max():,.0f}")
         
         return df
@@ -166,8 +166,8 @@ class HospitalDataPreparer:
         
         # Check required columns
         required_columns = [
-            'provider_id', 'reporting_period_end', 'total_expenses', 
-            'total_charges', 'net_income', 'beds'
+            'provider_id', 'report_period', 'total_expenses', 
+            'total_charges', 'net_income', 'beds_number'
         ]
         
         missing_columns = [col for col in required_columns if col not in df.columns]
@@ -180,7 +180,7 @@ class HospitalDataPreparer:
             logger.error("Duplicate provider IDs found")
             return False
         
-        if df['beds'].min() <= 0:
+        if df['beds_number'].min() <= 0:
             logger.error("Invalid bed counts found")
             return False
         
@@ -235,9 +235,9 @@ class HospitalDataPreparer:
         logger.info(f"\n{df.head()}")
         
         logger.info("\n📈 Data Statistics:")
-        logger.info(f"Average beds: {df['beds'].mean():.1f}")
+        logger.info(f"Average beds: {df['beds_number'].mean():.1f}")
         logger.info(f"Average expenses: ${df['total_expenses'].mean():,.0f}")
-        logger.info(f"Hospitals with >50 beds: {len(df[df['beds'] > 50])}")
+        logger.info(f"Hospitals with >50 beds: {len(df[df['beds_number'] > 50])}")
         
         return gcs_uri
 

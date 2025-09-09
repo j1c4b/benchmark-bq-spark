@@ -109,9 +109,9 @@ create_schema_file() {
 [
     {
         "name": "provider_id",
-        "type": "STRING",
+        "type": "INTEGER",
         "mode": "REQUIRED",
-        "description": "Hospital provider ID (6-digit CMS identifier)"
+        "description": "Hospital provider ID (integer identifier)"
     },
     {
         "name": "hospital_name",
@@ -132,13 +132,13 @@ create_schema_file() {
         "description": "Hospital state (2-letter code)"
     },
     {
-        "name": "beds",
+        "name": "beds_number",
         "type": "INTEGER",
         "mode": "NULLABLE",
         "description": "Number of hospital beds"
     },
     {
-        "name": "reporting_period_end",
+        "name": "report_period",
         "type": "DATE",
         "mode": "NULLABLE",
         "description": "End date of reporting period"
@@ -232,13 +232,13 @@ create_optimized_table() {
     
     # Create table with partitioning and clustering
     log_info "Creating table with:"
-    log_info "  📅 Partitioned by: reporting_period_end (DATE)"
+    log_info "  📅 Partitioned by: report_period (DATE)"
     log_info "  🏷️  Clustered by: provider_id"
     
     bq mk \
         --table \
         --schema="$SCHEMA_FILE" \
-        --time_partitioning_field=reporting_period_end \
+        --time_partitioning_field=report_period \
         --time_partitioning_type=DAY \
         --clustering_fields=provider_id \
         --description="Staging table for hospital cost report data with optimized partitioning and clustering" \
@@ -282,7 +282,7 @@ load_data_to_bigquery() {
         END_TIME=$(date +%s)
         DURATION=$((END_TIME - START_TIME))
         log_success "Data loaded successfully in ${DURATION} seconds"
-        log_info "Data automatically distributed across partitions by reporting_period_end"
+        log_info "Data automatically distributed across partitions by report_period"
     else
         log_error "BigQuery load failed"
         exit 1
@@ -306,7 +306,7 @@ verify_load() {
     # Show sample data
     log_info "Sample data preview:"
     bq query --use_legacy_sql=false --format=table --quiet \
-        "SELECT provider_id, hospital_name, city, state, beds, total_expenses 
+        "SELECT provider_id, hospital_name, city, state, beds_number, total_expenses 
          FROM \`$FULL_TABLE_ID\` 
          LIMIT 5"
 }

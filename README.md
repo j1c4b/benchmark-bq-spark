@@ -22,11 +22,12 @@ benchmark-bq-spark/
 ├── scripts/
 │   ├── config/                 # GCP configuration and connection management
 │   ├── data_preparation/       # Sample data generation and processing
-│   ├── bigquery_native/        # BigQuery native table scripts
+│   ├── bigquery_native/        # BigQuery native table scripts ✅
 │   ├── bigquery_external/      # BigQuery external table scripts (planned)
 │   ├── pyspark/               # PySpark processing scripts (planned)
-│   ├── monitoring/            # Performance monitoring tools (planned)
-│   └── orchestrator/          # Benchmark orchestration (planned)
+│   ├── monitoring/            # Performance monitoring tools ✅
+│   ├── pipeline_runner.py      # End-to-end pipeline orchestration ✅
+│   └── staging_queries.sql     # Benchmark analytics queries ✅
 ├── results/                   # Performance metrics and analysis results
 ├── docs/                      # Project documentation
 ├── requirements.txt           # Python dependencies
@@ -242,11 +243,39 @@ WITH yearly_summary AS (
 SELECT * FROM yearly_summary LIMIT 10;
 ```
 
+## 📊 Benchmark Query Validation Results ✅
+
+### Performance Testing Completed
+Successfully executed and validated 3 analytics queries with progressive optimization:
+
+| Query | Description | Execution Time | Data Processed | Optimization | Status |
+|-------|-------------|----------------|----------------|--------------|--------|
+| **Query 1** | Original (Full Table Scan) | 2.3 seconds | 4.8KB (4 partitions) | None | ✅ Validated |
+| **Query 2** | Year-Filtered (Partition Pruning) | 2.1 seconds | 1KB (1 partition) | 78% data reduction | ✅ Validated |
+| **Query 3** | Year + Provider (Full Optimization) | 2.1 seconds | 1KB (4 records) | 60% result reduction | ✅ Validated |
+
+### Key Validation Results
+- ✅ **Window Functions**: RANK, DENSE_RANK, LAG, LEAD all working correctly
+- ✅ **Partition Pruning**: 78% reduction in data scanned (4.8KB → 1KB)
+- ✅ **Clustering Benefits**: 60% reduction in result set (10 → 4 records)
+- ✅ **Cost Optimization**: Free tier to Tier 1 based on query complexity
+- ✅ **BigQuery Native Baseline**: Ready for engine comparison
+
+### Staging Table Ready for Engine Comparison
+- **Table**: `benchmark-bq-spark.healthcare_benchmark.stg_healthcare_hospital_data`
+- **Optimization**: Partitioned by `report_period`, clustered by `provider_id`
+- **Data**: 100 sample records across 4 years (2021-2024)
+- **Schema**: 14 columns with proper data types
+- **Queries**: 3 benchmark queries in `scripts/staging_queries.sql`
+
+**📈 Detailed Performance Analysis**: See `results/benchmark_queries_performance_analysis.md`
+
 ## ☁️ Engine Deployment
 
 - **Google Cloud Storage**: CSV file staging for both BigQuery approaches
-- **BigQuery**: Native table ingestion and external table querying
-- **PySpark**: Local execution or cloud clusters (Google Dataproc, AWS EMR)
+- **BigQuery Native** ✅: Table ingestion completed with performance baseline
+- **BigQuery External** 🔄: CSV file querying (next implementation)
+- **PySpark** 🔄: Local execution or cloud clusters (next implementation)
 
 ## 🤝 Contributing
 

@@ -1,0 +1,87 @@
+-- Staging Table Ready Queries
+-- Focus on staging table data for BigQuery Native vs External vs Spark comparison
+
+-- Query 1: Basic staging table analysis
+SELECT 
+  provider_id,
+  hospital_name,
+  city,
+  state,
+  beds_number,
+  EXTRACT(YEAR FROM report_period) as report_year,
+  total_expenses,
+  total_charges,
+  net_income,
+  ROUND(total_charges / total_expenses, 2) as charge_to_expense_ratio
+FROM `benchmark-bq-spark.healthcare_benchmark.stg_healthcare_hospital_data`
+WHERE beds_number > 50
+ORDER BY total_expenses DESC
+LIMIT 20;
+
+-- Query 2: Year-over-year comparison (simple aggregation)
+SELECT 
+  EXTRACT(YEAR FROM report_period) as report_year,
+  COUNT(*) as hospital_count,
+  AVG(beds_number) as avg_beds,
+  SUM(total_expenses) as total_expenses,
+  AVG(total_expenses) as avg_expenses,
+  SUM(net_income) as total_net_income,
+  AVG(net_income) as avg_net_income
+FROM `benchmark-bq-spark.healthcare_benchmark.stg_healthcare_hospital_data`
+WHERE beds_number > 50
+GROUP BY report_year
+ORDER BY report_year;
+
+-- Query 3: State-wise analysis
+SELECT 
+  state,
+  COUNT(*) as hospital_count,
+  AVG(beds_number) as avg_beds,
+  AVG(total_expenses) as avg_expenses,
+  AVG(net_income) as avg_net_income,
+  ROUND(AVG(total_charges / total_expenses), 2) as avg_charge_ratio
+FROM `benchmark-bq-spark.healthcare_benchmark.stg_healthcare_hospital_data`
+WHERE beds_number > 50
+GROUP BY state
+HAVING COUNT(*) >= 2
+ORDER BY avg_expenses DESC;
+
+-- Query 4: Hospital size category analysis
+SELECT 
+  CASE 
+    WHEN beds_number < 100 THEN 'Small (50-99)'
+    WHEN beds_number < 200 THEN 'Medium (100-199)'
+    WHEN beds_number < 300 THEN 'Large (200-299)'
+    ELSE 'Very Large (300+)'
+  END as size_category,
+  COUNT(*) as hospital_count,
+  AVG(total_expenses) as avg_expenses,
+  AVG(net_income) as avg_net_income,
+  MIN(net_income) as min_net_income,
+  MAX(net_income) as max_net_income
+FROM `benchmark-bq-spark.healthcare_benchmark.stg_healthcare_hospital_data`
+WHERE beds_number > 50
+GROUP BY size_category
+ORDER BY 
+  CASE size_category
+    WHEN 'Small (50-99)' THEN 1
+    WHEN 'Medium (100-199)' THEN 2
+    WHEN 'Large (200-299)' THEN 3
+    ELSE 4
+  END;
+
+-- Query 5: Performance-focused query (for benchmarking)
+SELECT 
+  provider_id,
+  hospital_name,
+  EXTRACT(YEAR FROM report_period) as report_year,
+  beds_number,
+  total_expenses,
+  net_income,
+  ROUND(net_income / total_expenses * 100, 2) as profit_margin_pct
+FROM `benchmark-bq-spark.healthcare_benchmark.stg_healthcare_hospital_data`
+WHERE beds_number > 100 
+  AND total_expenses > 50000000  -- $50M+
+  AND net_income IS NOT NULL
+ORDER BY profit_margin_pct DESC, total_expenses DESC
+LIMIT 50;
