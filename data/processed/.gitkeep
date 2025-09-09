@@ -1,0 +1,3 @@
+# This file ensures the data/processed directory is tracked by git
+# Cleaned and processed CSV files will be placed in this directory
+# This directory contains data ready for engine comparison
