@@ -23,7 +23,7 @@ benchmark-bq-spark/
 │   ├── config/                 # GCP configuration and connection management
 │   ├── data_preparation/       # Sample data generation and processing
 │   ├── bigquery_native/        # BigQuery native table scripts ✅
-│   ├── bigquery_external/      # BigQuery external table scripts (planned)
+│   ├── bigquery_external/      # BigQuery external table scripts ✅
 │   ├── pyspark/               # PySpark processing scripts (planned)
 │   ├── monitoring/            # Performance monitoring tools ✅
 │   ├── pipeline_runner.py      # End-to-end pipeline orchestration ✅
@@ -270,11 +270,39 @@ Successfully executed and validated 3 analytics queries with progressive optimiz
 
 **📈 Detailed Performance Analysis**: See `results/benchmark_queries_performance_analysis.md`
 
+## 📊 BigQuery Native vs External Table Comparison ✅
+
+### Performance Testing Completed
+Successfully executed comparative benchmarks between BigQuery Native and External Tables:
+
+| Query | Native Table | External Table | Performance Difference | Winner |
+|-------|--------------|----------------|------------------------|--------|
+| **Query 1 (Original)** | 2.67s | 2.48s | 7.1% faster | 🟢 External |
+| **Query 2 (Year Filter)** | 2.14s | 2.37s | 11.0% slower | 🔴 External |
+| **Query 3 (Multi Filter)** | 2.08s | 2.16s | 4.2% slower | 🟡 External |
+| **Overall Average** | 2.29s | 2.34s | 2.0% slower | External competitive |
+
+### Key Comparison Results
+- ✅ **Competitive Performance**: External tables within 2% of native table performance
+- ✅ **External Table**: `ext_healthcare_hospital_data` (800 records across 8 CSV files)
+- ❌ **No Optimization Benefits**: External tables scan all files regardless of filters
+- ✅ **Cost Trade-offs**: Lower storage costs but higher processing for frequent queries
+- ✅ **Automated Framework**: Complete benchmark runner for repeatable comparisons
+
+### External Table Implementation
+- **Table**: `benchmark-bq-spark.healthcare_benchmark.ext_healthcare_hospital_data`
+- **Data Source**: Direct CSV file scanning from GCS (`gs://bucket/raw/*.csv`)
+- **Schema**: 14 columns adapted for CSV structure (`beds` vs `beds_number`)
+- **Queries**: 3 adapted benchmark queries in `scripts/bigquery_external/`
+- **Framework**: Automated creation and benchmarking scripts
+
+**📈 Detailed External Table Analysis**: See `results/external_table_performance_analysis.md` and `EXTERNAL_TABLE_SUMMARY.md`
+
 ## ☁️ Engine Deployment
 
 - **Google Cloud Storage**: CSV file staging for both BigQuery approaches
 - **BigQuery Native** ✅: Table ingestion completed with performance baseline
-- **BigQuery External** 🔄: CSV file querying (next implementation)
+- **BigQuery External** ✅: CSV file querying completed with performance comparison
 - **PySpark** 🔄: Local execution or cloud clusters (next implementation)
 
 ## 🤝 Contributing
